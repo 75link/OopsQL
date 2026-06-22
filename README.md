@@ -42,6 +42,10 @@ oopsql init-config
 
 By default, `oopsql scan` exits with code `1` when it finds any risk. Use `--fail-on HIGH`, `--fail-on CRITICAL`, or `--fail-on NONE` to control that behavior in CI.
 
+## Website
+
+Open `docs/index.html` in a browser to see the static project page.
+
 ## Example Output
 
 ```text

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="OopsQL is a lightweight T-SQL blast-radius analyzer for SQL Server."
+    />
+    <title>OopsQL</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="OopsQL home">
+        <span class="brand-mark">!</span>
+        <span>OopsQL</span>
+      </a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="#install">Install</a>
+        <a href="#rules">Rules</a>
+        <a href="#config">Config</a>
+        <a href="https://github.com/75link/OopsQL">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">SQL Server safety check</p>
+          <h1>OopsQL</h1>
+          <p class="tagline">Find out what your query can mess up before you run it.</p>
+          <p class="intro">
+            A lightweight T-SQL blast-radius analyzer for developers, analysts,
+            DBAs, ERP admins, and data teams.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#install">Install</a>
+            <a class="button secondary" href="https://github.com/75link/OopsQL">View repo</a>
+          </div>
+        </div>
+
+        <div class="terminal-shell" aria-label="Example OopsQL scan output">
+          <div class="terminal-top">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <pre><code>$ oopsql scan dangerous_update.sql
+
+OopsQL Risk Report
+Overall Risk: CRITICAL
+Findings: 4
+
+[CRITICAL] OOPS001
+UPDATE without WHERE
+
+[HIGH] OOPS010
+Protected table touched: invoice</code></pre>
+        </div>
+      </section>
+
+      <section class="trust-strip" aria-label="Key facts">
+        <div>
+          <strong>Static only</strong>
+          <span>Never runs SQL</span>
+        </div>
+        <div>
+          <strong>CLI first</strong>
+          <span>Works in local dev and CI</span>
+        </div>
+        <div>
+          <strong>T-SQL focused</strong>
+          <span>Built for SQL Server scripts</span>
+        </div>
+      </section>
+
+      <section class="section split">
+        <div>
+          <p class="eyebrow">What it catches</p>
+          <h2>Risky scripts before they hit production.</h2>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <span class="severity critical">Critical</span>
+            <h3>Missing filters</h3>
+            <p>Flags `UPDATE` and `DELETE` statements without a `WHERE` clause.</p>
+          </article>
+          <article>
+            <span class="severity high">High</span>
+            <h3>Protected tables</h3>
+            <p>Calls out changes to tables like invoices, payments, clients, and inventory.</p>
+          </article>
+          <article>
+            <span class="severity medium">Medium</span>
+            <h3>Rollback gaps</h3>
+            <p>Warns when risky scripts do not include rollback notes or a rollback section.</p>
+          </article>
+          <article>
+            <span class="severity medium">Medium</span>
+            <h3>Reporting traps</h3>
+            <p>Flags `SELECT *`, `NOLOCK`, and possible one-to-many join mistakes.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="install">
+        <div class="section-heading">
+          <p class="eyebrow">Install</p>
+          <h2>Run it from the command line.</h2>
+        </div>
+        <div class="code-layout">
+          <pre><code>git clone https://github.com/75link/OopsQL.git
+cd OopsQL
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+
+oopsql scan examples/dangerous_update.sql</code></pre>
+          <div class="callout">
+            <h3>No database connection needed.</h3>
+            <p>
+              OopsQL reads `.sql` files and reports risk. It does not connect to
+              SQL Server and does not execute scripts.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="rules">
+        <div class="section-heading">
+          <p class="eyebrow">Rules</p>
+          <h2>Simple checks with clear names.</h2>
+        </div>
+        <div class="rules-table" role="table" aria-label="OopsQL rules">
+          <div role="row">
+            <strong>Rule</strong>
+            <strong>Severity</strong>
+            <strong>Description</strong>
+          </div>
+          <div role="row"><span>OOPS001</span><span>Critical</span><span>UPDATE without WHERE</span></div>
+          <div role="row"><span>OOPS002</span><span>Critical</span><span>DELETE without WHERE</span></div>
+          <div role="row"><span>OOPS003</span><span>Critical</span><span>TRUNCATE TABLE detected</span></div>
+          <div role="row"><span>OOPS004</span><span>Critical</span><span>DROP statement detected</span></div>
+          <div role="row"><span>OOPS005</span><span>High</span><span>ALTER statement detected</span></div>
+          <div role="row"><span>OOPS006</span><span>High</span><span>MERGE statement detected</span></div>
+          <div role="row"><span>OOPS007</span><span>High</span><span>Missing explicit transaction</span></div>
+          <div role="row"><span>OOPS008</span><span>Medium</span><span>SELECT * detected</span></div>
+          <div role="row"><span>OOPS009</span><span>Medium</span><span>NOLOCK detected</span></div>
+          <div role="row"><span>OOPS010</span><span>High</span><span>Protected table touched</span></div>
+          <div role="row"><span>OOPS011</span><span>Medium</span><span>Missing rollback notes</span></div>
+          <div role="row"><span>OOPS012</span><span>Medium</span><span>Possible one-to-many reporting join risk</span></div>
+        </div>
+      </section>
+
+      <section class="section split" id="config">
+        <div>
+          <p class="eyebrow">Config</p>
+          <h2>Mark the tables that matter most.</h2>
+          <p>
+            Add an `oopsql.yml` file to set protected tables and transaction rules
+            for your project.
+          </p>
+        </div>
+        <pre><code>protected_tables:
+  - invoice
+  - payment
+  - inventory
+  - client
+
+require_transaction_for:
+  - UPDATE
+  - DELETE
+  - MERGE
+  - INSERT
+  - ALTER
+  - DROP
+  - TRUNCATE</code></pre>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>OopsQL</span>
+      <span>Static analysis only. No SQL execution.</span>
+    </footer>
+  </body>
+</html>
+
