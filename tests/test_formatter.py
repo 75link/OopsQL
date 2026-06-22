@@ -36,3 +36,23 @@ def test_text_output_includes_core_report_fields():
     assert "Overall Risk: LOW" in output
     assert "Findings: 0" in output
 
+
+def test_markdown_output_structure():
+    report = RiskReport(
+        file="danger.sql",
+        findings=[
+            Finding(
+                rule_id="OOPS009",
+                severity="MEDIUM",
+                line=3,
+                message="NOLOCK hint detected.",
+                suggestion="Avoid dirty reads.",
+            )
+        ],
+    )
+
+    output = format_reports([report], "markdown")
+
+    assert output.startswith("# OopsQL Risk Report")
+    assert "| Severity | Rule | Line | Message |" in output
+    assert "| MEDIUM | OOPS009 | 3 | NOLOCK hint detected. |" in output

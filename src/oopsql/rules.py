@@ -20,7 +20,7 @@ class SqlStatement:
 
 
 def analyze_sql(sql: str, config: OopsConfig) -> list[Finding]:
-    statements = split_statements(sql)
+    statements = split_statements(strip_sql_comments(sql))
     findings: list[Finding] = []
 
     for statement in statements:
@@ -34,6 +34,72 @@ def analyze_sql(sql: str, config: OopsConfig) -> list[Finding]:
             finding.rule_id,
         ),
     )
+
+
+def strip_sql_comments(sql: str) -> str:
+    output: list[str] = []
+    index = 0
+    in_single_quote = False
+    in_bracket = False
+
+    while index < len(sql):
+        char = sql[index]
+        next_char = sql[index + 1] if index + 1 < len(sql) else ""
+
+        if in_single_quote:
+            output.append(char)
+            if char == "'" and next_char == "'":
+                output.append(next_char)
+                index += 2
+                continue
+            if char == "'":
+                in_single_quote = False
+            index += 1
+            continue
+
+        if in_bracket:
+            output.append(char)
+            if char == "]":
+                in_bracket = False
+            index += 1
+            continue
+
+        if char == "'":
+            in_single_quote = True
+            output.append(char)
+            index += 1
+            continue
+
+        if char == "[":
+            in_bracket = True
+            output.append(char)
+            index += 1
+            continue
+
+        if char == "-" and next_char == "-":
+            output.extend("  ")
+            index += 2
+            while index < len(sql) and sql[index] != "\n":
+                output.append(" ")
+                index += 1
+            continue
+
+        if char == "/" and next_char == "*":
+            output.extend("  ")
+            index += 2
+            while index < len(sql):
+                if sql[index] == "*" and index + 1 < len(sql) and sql[index + 1] == "/":
+                    output.extend("  ")
+                    index += 2
+                    break
+                output.append("\n" if sql[index] == "\n" else " ")
+                index += 1
+            continue
+
+        output.append(char)
+        index += 1
+
+    return "".join(output)
 
 
 def split_statements(sql: str) -> list[SqlStatement]:

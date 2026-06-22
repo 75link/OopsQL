@@ -54,3 +54,26 @@ def test_nolock():
 def test_protected_table_detection():
     assert "OOPS010" in rule_ids("UPDATE dbo.Client SET Name = 'A' WHERE ClientId = 1;")
 
+
+def test_commented_out_sql_is_not_reported():
+    sql = """
+    -- UPDATE dbo.Invoice SET Status = 'Paid';
+    SELECT InvoiceId FROM dbo.Invoice;
+    """
+
+    ids = rule_ids(sql)
+
+    assert "OOPS001" not in ids
+    assert "OOPS007" not in ids
+    assert "OOPS011" not in ids
+
+
+def test_block_commented_sql_is_not_reported():
+    sql = """
+    /*
+      DELETE FROM dbo.Payment;
+    */
+    SELECT PaymentId FROM dbo.Payment;
+    """
+
+    assert "OOPS002" not in rule_ids(sql)

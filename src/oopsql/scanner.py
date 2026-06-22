@@ -20,4 +20,3 @@ def scan_path(path: Path, config: OopsConfig | None = None) -> list[RiskReport]:
 def scan_file(path: Path, config: OopsConfig) -> RiskReport:
     sql = path.read_text(encoding="utf-8")
     return RiskReport(file=str(path), findings=analyze_sql(sql, config))
-

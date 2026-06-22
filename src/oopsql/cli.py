@@ -4,8 +4,9 @@ import argparse
 import sys
 from pathlib import Path
 
-from oopsql.config import write_default_config
+from oopsql.config import load_config_file, write_default_config
 from oopsql.formatter import format_reports
+from oopsql.models import RiskReport, Severity
 from oopsql.scanner import scan_path
 
 
@@ -20,9 +21,26 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("path", type=Path, help="Path to a .sql file or folder.")
     scan.add_argument(
         "--format",
-        choices=["text", "json"],
+        choices=["text", "json", "markdown"],
         default="text",
         help="Output format.",
+    )
+    scan.add_argument(
+        "--config",
+        type=Path,
+        help="Path to an oopsql.yml file. Defaults to searching from the scan path.",
+    )
+    scan.add_argument(
+        "--min-severity",
+        choices=["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+        default="LOW",
+        help="Only show findings at or above this severity.",
+    )
+    scan.add_argument(
+        "--fail-on",
+        choices=["LOW", "MEDIUM", "HIGH", "CRITICAL", "NONE"],
+        default="LOW",
+        help="Return exit code 1 when findings at or above this severity exist.",
     )
 
     subparsers.add_parser("init-config", help="Create an oopsql.yml config file.")
@@ -40,9 +58,11 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         if args.command == "scan":
-            reports = scan_path(args.path)
+            config = load_config_file(args.config) if args.config else None
+            reports = scan_path(args.path, config)
+            reports = filter_reports(reports, args.min_severity)
             print(format_reports(reports, args.format))
-            return 1 if any(report.findings for report in reports) else 0
+            return 1 if should_fail(reports, args.fail_on) else 0
     except Exception as exc:
         print(f"oopsql: {exc}", file=sys.stderr)
         return 2
@@ -51,6 +71,29 @@ def main(argv: list[str] | None = None) -> int:
     return 2
 
 
+def filter_reports(reports: list[RiskReport], min_severity: str) -> list[RiskReport]:
+    threshold = Severity[min_severity]
+    filtered: list[RiskReport] = []
+    for report in reports:
+        findings = [
+            finding
+            for finding in report.findings
+            if Severity[finding.severity] >= threshold
+        ]
+        filtered.append(RiskReport(file=report.file, findings=findings))
+    return filtered
+
+
+def should_fail(reports: list[RiskReport], fail_on: str) -> bool:
+    if fail_on == "NONE":
+        return False
+    threshold = Severity[fail_on]
+    return any(
+        Severity[finding.severity] >= threshold
+        for report in reports
+        for finding in report.findings
+    )
+
+
 if __name__ == "__main__":
     raise SystemExit(main())
-

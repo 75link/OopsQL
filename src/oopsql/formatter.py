@@ -19,6 +19,9 @@ def format_reports(reports: list[RiskReport], output_format: str = "text") -> st
             }
         return json.dumps(payload, indent=2)
 
+    if output_format == "markdown":
+        return format_markdown_reports(reports)
+
     return "\n\n".join(format_text_report(report) for report in reports)
 
 
@@ -52,10 +55,55 @@ def format_text_report(report: RiskReport) -> str:
     return "\n".join(lines)
 
 
+def format_markdown_reports(reports: list[RiskReport]) -> str:
+    lines = [
+        "# OopsQL Risk Report",
+        "",
+        f"Overall risk: **{_overall_risk(reports)}**",
+        f"Files scanned: **{len(reports)}**",
+        f"Findings: **{sum(report.findings_count for report in reports)}**",
+    ]
+
+    for report in reports:
+        lines.extend(
+            [
+                "",
+                f"## {report.file}",
+                "",
+                f"Overall risk: **{report.overall_risk}**",
+                f"Findings: **{report.findings_count}**",
+            ]
+        )
+        if not report.findings:
+            lines.extend(["", "No risky patterns detected."])
+            continue
+
+        lines.extend(
+            [
+                "",
+                "| Severity | Rule | Line | Message |",
+                "| --- | --- | --- | --- |",
+            ]
+        )
+        for finding in report.findings:
+            line = "" if finding.line is None else str(finding.line)
+            lines.append(
+                "| "
+                f"{finding.severity} | {finding.rule_id} | {line} | "
+                f"{_escape_markdown_cell(finding.message)} |"
+            )
+
+    return "\n".join(lines)
+
+
 def _overall_risk(reports: list[RiskReport]) -> str:
     if not reports:
         return "LOW"
     return max(reports, key=lambda report: Severity[report.overall_risk]).overall_risk
+
+
+def _escape_markdown_cell(value: str) -> str:
+    return value.replace("|", "\\|").replace("\n", " ")
 
 
 def _title_for(rule_id: str) -> str:
@@ -74,4 +122,3 @@ def _title_for(rule_id: str) -> str:
         "OOPS012": "Possible one-to-many reporting join risk",
     }
     return titles.get(rule_id, "Risk detected")
-

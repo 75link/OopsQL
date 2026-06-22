@@ -4,7 +4,7 @@
 
 - Add more precise T-SQL parsing.
 - Add rule suppression comments.
-- Add SARIF and Markdown output formats.
+- Add SARIF output for code scanning.
 - Improve protected-table matching for aliases and multi-part names.
 
 ## Later
@@ -13,4 +13,3 @@
 - CI templates for GitHub Actions and Azure DevOps.
 - Risk scoring that considers table criticality and operation type.
 - Richer rollback-plan checks.
-

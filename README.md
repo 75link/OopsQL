@@ -31,10 +31,16 @@ oopsql scan path/to/file.sql
 oopsql scan path/to/folder
 oopsql scan path/to/file.sql --format text
 oopsql scan path/to/file.sql --format json
+oopsql scan path/to/file.sql --format markdown
+oopsql scan path/to/file.sql --min-severity HIGH
+oopsql scan path/to/file.sql --fail-on CRITICAL
+oopsql scan path/to/file.sql --config path/to/oopsql.yml
 oopsql init-config
 ```
 
 `oopsql init-config` writes an `oopsql.yml` file in the current directory.
+
+By default, `oopsql scan` exits with code `1` when it finds any risk. Use `--fail-on HIGH`, `--fail-on CRITICAL`, or `--fail-on NONE` to control that behavior in CI.
 
 ## Example Output
 
@@ -111,4 +117,3 @@ For `UPDATE` and `DELETE` statements with a `WHERE` clause, OopsQL can include a
 ## Contributing
 
 Issues and pull requests are welcome. Please include tests for rule behavior changes and keep in mind that OopsQL must never execute user SQL.
-

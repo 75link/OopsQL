@@ -42,6 +42,10 @@ def load_config(start_path: Path | None = None) -> OopsConfig:
     if path is None:
         return config_from_dict(DEFAULT_CONFIG)
 
+    return load_config_file(path)
+
+
+def load_config_file(path: Path) -> OopsConfig:
     with path.open("r", encoding="utf-8") as handle:
         data = yaml.safe_load(handle) or {}
     merged = {**DEFAULT_CONFIG, **data}
@@ -72,4 +76,3 @@ def config_from_dict(data: dict[str, Any]) -> OopsConfig:
             str(item).upper() for item in data.get("require_transaction_for", [])
         ],
     )
-
