@@ -4,7 +4,7 @@
 
 Find out what your query can mess up before you run it.
 
-OopsQL is a lightweight T-SQL blast-radius analyzer for SQL Server production safety. It helps developers, analysts, DBAs, ERP admins, and data architects detect risky SQL scripts before execution.
+OopsQL is a lightweight T-SQL blast-radius analyzer for SQL Server production safety. It helps Database developers,architects detect risky SQL scripts before execution.
 
 OopsQL does not execute the SQL files you scan. Scan mode is static analysis. The optional connection command only reads basic SQL Server metadata.
 
