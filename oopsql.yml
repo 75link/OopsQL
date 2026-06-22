@@ -1,0 +1,24 @@
+protected_tables:
+  - invoice
+  - invoiceitem
+  - payment
+  - glentry
+  - inventory
+  - client
+  - purchaseorder
+
+risky_keywords:
+  - production
+  - finance
+  - revenue
+  - accounting
+
+require_transaction_for:
+  - UPDATE
+  - DELETE
+  - MERGE
+  - INSERT
+  - ALTER
+  - DROP
+  - TRUNCATE
+
