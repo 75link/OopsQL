@@ -17,6 +17,7 @@
         <span>OopsQL</span>
       </a>
       <nav class="nav" aria-label="Primary navigation">
+        <a href="#overview">Overview</a>
         <a href="#install">Install</a>
         <a href="#rules">Rules</a>
         <a href="#config">Config</a>
@@ -72,6 +73,50 @@ Protected table touched: invoice</code></pre>
         <div>
           <strong>T-SQL focused</strong>
           <span>Built for SQL Server scripts</span>
+        </div>
+      </section>
+
+      <section class="section overview" id="overview">
+        <div class="overview-copy">
+          <p class="eyebrow">Overview</p>
+          <h2>See the blast radius before the script runs.</h2>
+          <p>
+            OopsQL scans SQL files and turns risky T-SQL into a clear report:
+            severity, rule, line number, statement excerpt, and a practical next step.
+          </p>
+        </div>
+
+        <div class="overview-panel" aria-label="OopsQL workflow">
+          <div class="overview-step">
+            <span>01</span>
+            <strong>Scan</strong>
+            <p>Point OopsQL at one `.sql` file or a whole folder.</p>
+          </div>
+          <div class="overview-step">
+            <span>02</span>
+            <strong>Review</strong>
+            <p>Check critical changes, protected tables, missing transactions, and rollback gaps.</p>
+          </div>
+          <div class="overview-step">
+            <span>03</span>
+            <strong>Fix</strong>
+            <p>Add filters, preview queries, transactions, and rollback notes before production.</p>
+          </div>
+        </div>
+
+        <div class="overview-stats" aria-label="Report summary example">
+          <div>
+            <span>Overall Risk</span>
+            <strong>CRITICAL</strong>
+          </div>
+          <div>
+            <span>Findings</span>
+            <strong>4</strong>
+          </div>
+          <div>
+            <span>Output</span>
+            <strong>Text / JSON / Markdown</strong>
+          </div>
         </div>
       </section>
 
@@ -185,4 +230,3 @@ require_transaction_for:
     </footer>
   </body>
 </html>
-
