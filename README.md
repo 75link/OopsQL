@@ -4,7 +4,7 @@ Find out what your query can mess up before you run it.
 
 OopsQL is a lightweight T-SQL blast-radius analyzer for SQL Server. It helps developers, analysts, DBAs, ERP admins, and data architects detect risky SQL scripts before execution.
 
-This tool does not execute SQL. It performs static analysis only.
+OopsQL does not execute the SQL files you scan. Scan mode is static analysis. The optional connection command only reads basic SQL Server metadata.
 
 ## Overview
 
@@ -47,6 +47,21 @@ From a local checkout:
 pip install -e ".[dev]"
 ```
 
+For SQL Server connection checks:
+
+```bash
+pip install -e ".[mssql]"
+```
+
+To build a standalone executable:
+
+```bash
+pip install -e ".[exe]"
+sh scripts/build-exe.sh
+```
+
+The executable is created at `dist/oopsql`.
+
 ## Usage
 
 ```bash
@@ -58,12 +73,25 @@ oopsql scan path/to/file.sql --format markdown
 oopsql scan path/to/file.sql --min-severity HIGH
 oopsql scan path/to/file.sql --fail-on CRITICAL
 oopsql scan path/to/file.sql --config path/to/oopsql.yml
+oopsql connect --connection-string "Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=master;Trusted_Connection=yes;TrustServerCertificate=yes;"
 oopsql init-config
 ```
 
 `oopsql init-config` writes an `oopsql.yml` file in the current directory.
 
 By default, `oopsql scan` exits with code `1` when it finds any risk. Use `--fail-on HIGH`, `--fail-on CRITICAL`, or `--fail-on NONE` to control that behavior in CI.
+
+## SQL Server Connection
+
+OopsQL can test a SQL Server connection using the same server details you use in SQL Server Management Studio.
+
+It connects to SQL Server, not to the SSMS desktop app.
+
+```bash
+oopsql connect --connection-string "Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=master;Trusted_Connection=yes;TrustServerCertificate=yes;"
+```
+
+The `connect` command only reads server metadata. It does not execute your SQL files.
 
 ## Website
 

@@ -19,5 +19,4 @@ OopsQL rules focus on blast-radius risk rather than formatting style.
 
 ## Notes
 
-This MVP uses static statement-level heuristics. It does not connect to SQL Server and does not execute SQL.
-
+The scanner uses static statement-level heuristics. It does not execute the SQL files you scan.

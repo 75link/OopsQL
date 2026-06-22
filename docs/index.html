@@ -64,7 +64,7 @@ Protected table touched: invoice</code></pre>
       <section class="trust-strip" aria-label="Key facts">
         <div>
           <strong>Static only</strong>
-          <span>Never runs SQL</span>
+          <span>Never runs scanned scripts</span>
         </div>
         <div>
           <strong>CLI first</strong>
@@ -165,8 +165,8 @@ oopsql scan examples/dangerous_update.sql</code></pre>
           <div class="callout">
             <h3>No database connection needed.</h3>
             <p>
-              OopsQL reads `.sql` files and reports risk. It does not connect to
-              SQL Server and does not execute scripts.
+              OopsQL reads `.sql` files and reports risk. The optional connection
+              command only reads SQL Server metadata.
             </p>
           </div>
         </div>
@@ -226,7 +226,7 @@ require_transaction_for:
 
     <footer class="site-footer">
       <span>OopsQL</span>
-      <span>Static analysis only. No SQL execution.</span>
+      <span>Static scan. No script execution.</span>
     </footer>
   </body>
 </html>

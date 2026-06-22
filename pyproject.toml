@@ -34,6 +34,12 @@ dependencies = [
 dev = [
   "pytest>=8.0",
 ]
+mssql = [
+  "pyodbc>=5.0",
+]
+exe = [
+  "pyinstaller>=6.0",
+]
 
 [project.scripts]
 oopsql = "oopsql.cli:main"

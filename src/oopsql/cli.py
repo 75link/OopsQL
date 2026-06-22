@@ -8,6 +8,7 @@ from oopsql.config import load_config_file, write_default_config
 from oopsql.formatter import format_reports
 from oopsql.models import RiskReport, Severity
 from oopsql.scanner import scan_path
+from oopsql.sqlserver import format_connection_info, test_connection
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -43,6 +44,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Return exit code 1 when findings at or above this severity exist.",
     )
 
+    connect = subparsers.add_parser(
+        "connect",
+        help="Test a SQL Server connection. This does not run SQL files.",
+    )
+    connect.add_argument(
+        "--connection-string",
+        required=True,
+        help="ODBC connection string for the SQL Server you use in SSMS.",
+    )
+    connect.add_argument(
+        "--timeout",
+        type=int,
+        default=5,
+        help="Connection timeout in seconds.",
+    )
+
     subparsers.add_parser("init-config", help="Create an oopsql.yml config file.")
     return parser
 
@@ -63,6 +80,11 @@ def main(argv: list[str] | None = None) -> int:
             reports = filter_reports(reports, args.min_severity)
             print(format_reports(reports, args.format))
             return 1 if should_fail(reports, args.fail_on) else 0
+
+        if args.command == "connect":
+            info = test_connection(args.connection_string, timeout=args.timeout)
+            print(format_connection_info(info))
+            return 0
     except Exception as exc:
         print(f"oopsql: {exc}", file=sys.stderr)
         return 2
