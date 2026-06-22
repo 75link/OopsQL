@@ -6,6 +6,29 @@ OopsQL is a lightweight T-SQL blast-radius analyzer for SQL Server. It helps dev
 
 This tool does not execute SQL. It performs static analysis only.
 
+## Overview
+
+OopsQL reads SQL files and gives you a risk report before anyone runs the script.
+
+It checks for:
+
+- destructive changes like `DROP`, `TRUNCATE`, and risky `ALTER`
+- `UPDATE` and `DELETE` statements without a `WHERE` clause
+- missing `BEGIN TRAN` around data-changing statements
+- protected tables like invoices, payments, clients, and inventory
+- missing rollback notes in risky scripts
+- reporting issues like `SELECT *`, `NOLOCK`, and one-to-many joins
+
+The output is built for quick review:
+
+- overall risk
+- finding count
+- rule id
+- severity
+- line number
+- SQL excerpt
+- suggestion
+
 ## What It Does
 
 OopsQL scans `.sql` files and reports production-safety risks such as unsafe updates, deletes without filters, destructive schema changes, protected business tables, missing transactions, missing rollback guidance, and reporting queries that may duplicate totals through one-to-many joins.
