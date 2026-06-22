@@ -75,19 +75,36 @@ sh scripts/build-exe.sh
 
 The executable is created at `dist/oopsql`.
 
-## Usage
+## CLI Usage And Sample Controls
 
 ```bash
+# Scan a single SQL script
 oopsql scan path/to/file.sql
+
+# Scan an entire folder
 oopsql scan path/to/folder
+
+# Choose output format
 oopsql scan path/to/file.sql --format text
 oopsql scan path/to/file.sql --format json
 oopsql scan path/to/file.sql --format markdown
+
+# Pipe query text from SSMS, editors, or shell streams
 oopsql scan-stdin --file ssms-query.sql --format json
+
+# Filter report noise
 oopsql scan path/to/file.sql --min-severity HIGH
+
+# Control CI exit behavior
 oopsql scan path/to/file.sql --fail-on CRITICAL
+
+# Use a specific policy config
 oopsql scan path/to/file.sql --config path/to/oopsql.yml
+
+# Test a SQL Server connection
 oopsql connect --connection-string "Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=master;Trusted_Connection=yes;TrustServerCertificate=yes;"
+
+# Generate a default config
 oopsql init-config
 ```
 
@@ -247,12 +264,18 @@ Popup concept:
 ```text
 OopsQL - Execution Blocked
 
-OopsQL detected high-risk SQL in the current query window.
+OopsQL detected high-risk SQL in the current query window before execution.
+
+Query:
+
+BEGIN TRANSACTION
+DELETE FROM dbo.InventoryMaster;
+-- Explicitly forgot to highlight the WHERE line below before executing.
 
 - Destructive Action: DELETE statement contains no active filter criteria.
 - Protected Object: dbo.InventoryMaster is listed in the active policy config.
 
-[Cancel] [Run anyway]
+[Abort Script] [Bypass Policy Guard]
 ```
 
 ## Roadmap
