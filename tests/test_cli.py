@@ -1,4 +1,5 @@
 from pathlib import Path
+from io import StringIO
 
 from oopsql.cli import main
 
@@ -47,3 +48,14 @@ require_transaction_for:
 
     assert exit_code == 1
     assert "protected table: specialledger" in output
+
+
+def test_cli_scan_stdin(monkeypatch, capsys):
+    monkeypatch.setattr("sys.stdin", StringIO("UPDATE dbo.Invoice SET Status = 'Paid';"))
+
+    exit_code = main(["scan-stdin", "--file", "ssms-query.sql", "--format", "text"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "File: ssms-query.sql" in output
+    assert "OOPS001" in output

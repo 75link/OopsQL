@@ -4,10 +4,10 @@ import argparse
 import sys
 from pathlib import Path
 
-from oopsql.config import load_config_file, write_default_config
+from oopsql.config import load_config, load_config_file, write_default_config
 from oopsql.formatter import format_reports
 from oopsql.models import RiskReport, Severity
-from oopsql.scanner import scan_path
+from oopsql.scanner import scan_path, scan_sql
 from oopsql.sqlserver import format_connection_info, test_connection
 
 
@@ -38,6 +38,39 @@ def build_parser() -> argparse.ArgumentParser:
         help="Only show findings at or above this severity.",
     )
     scan.add_argument(
+        "--fail-on",
+        choices=["LOW", "MEDIUM", "HIGH", "CRITICAL", "NONE"],
+        default="LOW",
+        help="Return exit code 1 when findings at or above this severity exist.",
+    )
+
+    scan_stdin = subparsers.add_parser(
+        "scan-stdin",
+        help="Scan SQL text from stdin. Useful for editor and SSMS integrations.",
+    )
+    scan_stdin.add_argument(
+        "--file",
+        default="stdin.sql",
+        help="Display name to use in the report.",
+    )
+    scan_stdin.add_argument(
+        "--format",
+        choices=["text", "json", "markdown"],
+        default="json",
+        help="Output format.",
+    )
+    scan_stdin.add_argument(
+        "--config",
+        type=Path,
+        help="Path to an oopsql.yml file.",
+    )
+    scan_stdin.add_argument(
+        "--min-severity",
+        choices=["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+        default="LOW",
+        help="Only show findings at or above this severity.",
+    )
+    scan_stdin.add_argument(
         "--fail-on",
         choices=["LOW", "MEDIUM", "HIGH", "CRITICAL", "NONE"],
         default="LOW",
@@ -78,6 +111,13 @@ def main(argv: list[str] | None = None) -> int:
             config = load_config_file(args.config) if args.config else None
             reports = scan_path(args.path, config)
             reports = filter_reports(reports, args.min_severity)
+            print(format_reports(reports, args.format))
+            return 1 if should_fail(reports, args.fail_on) else 0
+
+        if args.command == "scan-stdin":
+            config = load_config_file(args.config) if args.config else load_config()
+            report = scan_sql(sys.stdin.read(), args.file, config)
+            reports = filter_reports([report], args.min_severity)
             print(format_reports(reports, args.format))
             return 1 if should_fail(reports, args.fail_on) else 0
 

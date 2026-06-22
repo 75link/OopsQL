@@ -70,6 +70,7 @@ oopsql scan path/to/folder
 oopsql scan path/to/file.sql --format text
 oopsql scan path/to/file.sql --format json
 oopsql scan path/to/file.sql --format markdown
+oopsql scan-stdin --file ssms-query.sql --format json
 oopsql scan path/to/file.sql --min-severity HIGH
 oopsql scan path/to/file.sql --fail-on CRITICAL
 oopsql scan path/to/file.sql --config path/to/oopsql.yml
@@ -92,6 +93,18 @@ oopsql connect --connection-string "Driver={ODBC Driver 18 for SQL Server};Serve
 ```
 
 The `connect` command only reads server metadata. It does not execute your SQL files.
+
+## SSMS Popup Guard
+
+To warn before a user runs a query in SQL Server Management Studio, OopsQL needs an SSMS extension. Python cannot hook the SSMS Execute button by itself.
+
+The repo now includes the bridge command an SSMS extension needs:
+
+```bash
+oopsql scan-stdin --file ssms-query.sql --format json --fail-on HIGH
+```
+
+See `integrations/ssms-guard/` for the popup flow and C# command prototype.
 
 ## Website
 
