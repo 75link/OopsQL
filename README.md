@@ -1,14 +1,18 @@
 # OopsQL
 
+`v0.1.2-beta`
+
 Find out what your query can mess up before you run it.
 
-OopsQL is a lightweight T-SQL blast-radius analyzer for SQL Server. It helps developers, analysts, DBAs, ERP admins, and data architects detect risky SQL scripts before execution.
+OopsQL is a lightweight T-SQL blast-radius analyzer for SQL Server production safety. It helps developers, analysts, DBAs, ERP admins, and data architects detect risky SQL scripts before execution.
 
 OopsQL does not execute the SQL files you scan. Scan mode is static analysis. The optional connection command only reads basic SQL Server metadata.
 
 ## Overview
 
-OopsQL reads SQL files and gives you a risk report before anyone runs the script.
+OopsQL reads SQL files or stdin query text and gives you a risk report before anyone runs the script.
+
+Unlike regular linters that focus on formatting style, OopsQL evaluates blast radius and structural safety risk before a script touches a production database.
 
 It checks for:
 
@@ -28,6 +32,15 @@ The output is built for quick review:
 - line number
 - SQL excerpt
 - suggestion
+
+## Risk Coverage
+
+| Severity | What OopsQL Looks For |
+| --- | --- |
+| `CRITICAL` | `UPDATE` or `DELETE` without a `WHERE` clause |
+| `CRITICAL` | destructive actions like `DROP` and `TRUNCATE` |
+| `HIGH` | `ALTER`, `MERGE`, protected table changes, or missing explicit transaction |
+| `MEDIUM` | `SELECT *`, `NOLOCK`, missing rollback notes, or one-to-many reporting join risk |
 
 ## What It Does
 
@@ -125,6 +138,29 @@ Message: UPDATE statement detected without a WHERE clause.
 Suggestion: Add a WHERE clause, run a SELECT preview first, and wrap the change in a transaction.
 ```
 
+## Terminal Mockup
+
+```text
+$ oopsql scan ./deploy_patch.sql
+
+OopsQL Risk Report
+File: ./deploy_patch.sql
+
+Overall Risk: CRITICAL
+Findings: 4
+
+[CRITICAL] OOPS001 - UPDATE without WHERE
+Line: 14
+Message: UPDATE statement detected without a WHERE clause.
+Excerpt: UPDATE [dbo].[InventoryMaster] SET [StatusFlag] = 'Archived'
+
+[HIGH] OOPS007 - Missing transaction
+Message: Risky data-changing statement detected without BEGIN TRAN.
+
+[HIGH] OOPS010 - Protected table touched
+Message: The script touches protected table: inventory.
+```
+
 ## Configuration
 
 ```yaml
@@ -142,6 +178,25 @@ risky_keywords:
   - finance
   - revenue
   - accounting
+
+require_transaction_for:
+  - UPDATE
+  - DELETE
+  - MERGE
+  - INSERT
+  - ALTER
+  - DROP
+  - TRUNCATE
+```
+
+Example policy-focused config:
+
+```yaml
+protected_tables:
+  - dbo.ERP_Global_Settings
+  - config.SystemParameters
+  - ledger.FinancialBalances
+  - dbo.InventoryMaster
 
 require_transaction_for:
   - UPDATE
@@ -173,6 +228,32 @@ require_transaction_for:
 ## Suggested Safer Scripts
 
 For `UPDATE` and `DELETE` statements with a `WHERE` clause, OopsQL can include a preview template that wraps the change in a transaction and shows the rows before modification.
+
+## SSMS Interception Concept
+
+OopsQL can be used by an SSMS extension to warn before a risky query runs.
+
+Flow:
+
+1. User presses Execute in SQL Server Management Studio.
+2. Extension reads the active query window text.
+3. Extension pipes the query into `oopsql scan-stdin --format json`.
+4. OopsQL returns a structured risk payload.
+5. Extension shows a warning popup if risk is high.
+6. User chooses Cancel or Run anyway.
+
+Popup concept:
+
+```text
+OopsQL - Execution Blocked
+
+OopsQL detected high-risk SQL in the current query window.
+
+- Destructive Action: DELETE statement contains no active filter criteria.
+- Protected Object: dbo.InventoryMaster is listed in the active policy config.
+
+[Cancel] [Run anyway]
+```
 
 ## Roadmap
 
